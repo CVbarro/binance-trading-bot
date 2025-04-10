@@ -5,8 +5,8 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Data
 @Entity
+@Data
 public class UserOrderReport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,4 +26,9 @@ public class UserOrderReport {
 
     @Column
     private LocalDateTime dtOperation;
+
+    @ManyToOne
+    @JoinColumn(name = "id_usuario") // Essa é a chave estrangeira
+    private User user;
 }
+

@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @Entity
 public class UserTrackingTicker {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

@@ -8,6 +8,8 @@ import java.util.List;
 @Data
 @Entity
 public class User {
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -38,5 +40,7 @@ public class User {
     @OneToMany
     @JoinColumn(name = "id_usuario", referencedColumnName = "id")
     private List<UserOrderReport> orderReports;
+
+
 
 }
