@@ -40,43 +40,69 @@ public class UserController {
     }
 
     @PostMapping("{id}/configuration")
-    public ResponseEntity<User> associteConfiguration(@PathVariable("id") Integer id, @RequestBody UserConfiguration configuration) {
+    public ResponseEntity<User> associateConfiguration(@PathVariable("id") Integer id, @RequestBody UserConfiguration configuration) {
         Optional<User> optionalUser = this.userRepository.findById(id);
+        if (optionalUser.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        if (optionalUser.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        //Cria a configuração na base de dados
         this.userConfigurationRepository.save(configuration);
-
-        //Associa a configuração ao usuario
         User user = optionalUser.get();
         user.getConfigurations().add(configuration);
         userRepository.save(user);
 
         return new ResponseEntity<>(user, HttpStatus.CREATED);
-
     }
 
     @PostMapping("{id}/tracking-ticker")
     public ResponseEntity<User> associateTicker(@PathVariable("id") Integer id, @RequestBody UserTrackingTicker ticker) {
         Optional<User> optionalUser = this.userRepository.findById(id);
+        if (optionalUser.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        if (optionalUser.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        //Cria a configuração na base de dados
         this.userTrackingTickerRepository.save(ticker);
-
-        //Associa a configuração ao usuario
         User user = optionalUser.get();
         user.getTrackingTickers().add(ticker);
         userRepository.save(user);
 
         return new ResponseEntity<>(user, HttpStatus.CREATED);
-
     }
 
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") Integer id) {
+        if (!userRepository.existsById(id)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        userRepository.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("{id}/configuration/{configId}")
+    public ResponseEntity<User> deleteConfiguration(@PathVariable("id") Integer userId, @PathVariable("configId") Integer configId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<UserConfiguration> optionalConfig = userConfigurationRepository.findById(configId);
+
+        if (optionalUser.isEmpty() || optionalConfig.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        User user = optionalUser.get();
+        UserConfiguration config = optionalConfig.get();
+
+        user.getConfigurations().remove(config);
+        userConfigurationRepository.delete(config);
+        userRepository.save(user);
+
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @DeleteMapping("{id}/tracking-ticker/{tickerId}")
+    public ResponseEntity<User> deleteTicker(@PathVariable("id") Integer userId, @PathVariable("tickerId") Integer tickerId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<UserTrackingTicker> optionalTicker = userTrackingTickerRepository.findById(tickerId);
+
+        if (optionalUser.isEmpty() || optionalTicker.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        User user = optionalUser.get();
+        UserTrackingTicker ticker = optionalTicker.get();
+
+        user.getTrackingTickers().remove(ticker);
+        userTrackingTickerRepository.delete(ticker);
+        userRepository.save(user);
+
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
 }
