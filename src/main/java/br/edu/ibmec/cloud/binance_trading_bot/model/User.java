@@ -29,14 +29,14 @@ public class User {
 
     @OneToMany
     @JoinColumn(name = "id_usuario", referencedColumnName = "id")
-    private List<UserConfiguration> configurations;
+    private List<UserConfiguration> configuracoes;
 
     @OneToMany
     @JoinColumn(name = "id_usuario", referencedColumnName = "id")
-    private List<UserTrackingTicker> trackingTickers;
+    private List<UserTrackingTicker> tickersMonitorados;
 
     @OneToMany
     @JoinColumn(name = "id_usuario", referencedColumnName = "id")
-    private List<UserOrderReport> orderReports;
+    private List<UserOrderReport> relatoriosDeOrdens;
 
 }
