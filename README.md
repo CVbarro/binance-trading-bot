@@ -101,27 +101,13 @@ Após a execução das ordens, os relatórios de transações são gerados autom
 
 Executando o Projeto Localmente
 Clone o repositório:
-
-bash
-Copiar
 git clone <URL_DO_REPOSITORIO>
+
 Navegue até a pasta do projeto e abra no seu IDE (Exemplo: IntelliJ, Eclipse).
 
 Configure o arquivo application.properties com as credenciais da Binance e a conexão com o banco de dados.
 
 Execute a aplicação utilizando a classe principal BinanceTradingBotApplication.java:
-
-bash
-Copiar
 mvn spring-boot:run
+
 A aplicação estará disponível na sua máquina local.
-
-Links úteis
-Swagger UI (Documentação da API): Link do Swagger
-
-Integrantes
-Vitor Farani
-
-João Pedro Bezamat
-
-César Viana
