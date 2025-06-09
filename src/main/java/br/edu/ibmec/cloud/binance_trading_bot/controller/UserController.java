@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -38,6 +39,12 @@ public class UserController {
                 .map(usuario -> new ResponseEntity<>(usuario, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+    @GetMapping
+    public ResponseEntity<List<User>> listarUsuarios() {
+        return new ResponseEntity<>(usuarioRepository.findAll(), HttpStatus.OK);
+    }
+
 
     @PostMapping("{id}/configuration")
     public ResponseEntity<User> associarConfiguracao(@PathVariable("id") Integer id, @RequestBody UserConfiguration configuracao) {
