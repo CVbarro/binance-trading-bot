@@ -122,7 +122,7 @@ public class BinanceIntegration {
 
 
 
-    public boolean isInsideBar(JSONArray candles) {
+    public String checkInsideBar(JSONArray candles, String symbol, double quantidade) {
         JSONArray prev = candles.getJSONArray(0);
         JSONArray curr = candles.getJSONArray(1);
 
@@ -130,8 +130,32 @@ public class BinanceIntegration {
         double prevLow = Double.parseDouble(prev.getString(3));
         double currHigh = Double.parseDouble(curr.getString(2));
         double currLow = Double.parseDouble(curr.getString(3));
+        double currClose = Double.parseDouble(curr.getString(4));
 
-        return (currHigh <= prevHigh) && (currLow >= prevLow);
+        // Log visual
+        System.out.printf("🕯️ Candle Anterior → [High: %.2f | Low: %.2f]%n", prevHigh, prevLow);
+        System.out.printf("🕯️ Candle Atual    → [High: %.2f | Low: %.2f | Close: %.2f]%n", currHigh, currLow, currClose);
+
+        boolean isInsideBar = (currHigh <= prevHigh) && (currLow >= prevLow);
+
+        if (!isInsideBar) return null;
+
+        System.out.println("📊 Padrão Inside Bar detectado!");
+
+        // Estratégia: rompimento
+        if (currClose > prevHigh) {
+            System.out.println("📈 Rompimento para cima! Comprando...");
+            createMarketOrder(symbol, quantidade, "BUY");
+            return "BUY";
+        } else if (currClose < prevLow) {
+            System.out.println("📉 Rompimento para baixo! Vendendo...");
+            createMarketOrder(symbol, quantidade, "SELL");
+            return "SELL";
+        } else {
+            System.out.println("⏸️ Ainda dentro da faixa, aguardando rompimento.");
+            return "NEUTRO";
+        }
     }
+
 
 }
