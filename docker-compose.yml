@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  bot:
+    build: .
+    container_name: trading-bot
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_APPLICATION_NAME: binance-trading-bot
+      SPRING_DATASOURCE_URL: jdbc:mysql://ibmec-cloud-tradingbot.mysql.database.azure.com/tradingbot
+      SPRING_DATASOURCE_USERNAME: Cvbarro
+      SPRING_DATASOURCE_PASSWORD: CvVtJp123
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge
