@@ -1,5 +1,6 @@
 package br.edu.ibmec.cloud.binance_trading_bot.controller;
 
+import br.edu.ibmec.cloud.binance_trading_bot.dtos.OrderReportDTO;
 import br.edu.ibmec.cloud.binance_trading_bot.model.User;
 import br.edu.ibmec.cloud.binance_trading_bot.model.UserOrderReport;
 import br.edu.ibmec.cloud.binance_trading_bot.repository.UserOrderReportRepository;
@@ -15,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -57,7 +60,6 @@ public class OrderController {
 
             OrderResponse resposta = mapper.readValue(resultado, OrderResponse.class);
 
-            // Lógica de salvar relatório continua igual...
             if ("BUY".equalsIgnoreCase(pedido.getLado())) {
                 UserOrderReport relatorio = new UserOrderReport();
                 relatorio.setSimbolo(pedido.getSimbolo());
@@ -86,5 +88,30 @@ public class OrderController {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/relatorio")
+    public List<OrderReportDTO> gerarRelatorio() {
+        List<UserOrderReport> ordens = relatorioOrdemRepositorio.findAll();
+        List<OrderReportDTO> relatorio = new ArrayList<>();
+
+        for (UserOrderReport ordem : ordens) {
+            if (ordem.getPrecoCompra() != null && ordem.getPrecoVenda() != null) {
+                double lucro = (ordem.getPrecoVenda() - ordem.getPrecoCompra()) * ordem.getQuantidade();
+                relatorio.add(new OrderReportDTO(
+                        ordem.getSimbolo(),
+                        ordem.getPrecoCompra(),
+                        ordem.getPrecoVenda(),
+                        lucro,
+                        ordem.getDataOperacao().toString(),
+                        ordem.getDataOperacao().toString() // você pode ajustar se tiver campos separados para venda
+                ));
+            }
+        }
+
+        double totalLucro = relatorio.stream().mapToDouble(OrderReportDTO::getLucro).sum();
+        System.out.println("📊 Lucro total: " + totalLucro);
+
+        return relatorio;
     }
 }

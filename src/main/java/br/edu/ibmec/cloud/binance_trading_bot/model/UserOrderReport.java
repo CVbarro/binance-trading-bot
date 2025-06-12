@@ -18,10 +18,10 @@ public class UserOrderReport {
     private double quantidade;
 
     @Column
-    private double precoCompra;
+    private Double precoCompra;
 
     @Column
-    private double precoVenda;
+    private Double precoVenda;
 
     @Column
     private LocalDateTime dataOperacao;
