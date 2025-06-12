@@ -33,42 +33,47 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<OrderResponse> enviarOrdem(@PathVariable("id") int id, @RequestBody OrderRequest pedido) {
         Optional<User> usuarioOptional = this.usuarioRepositorio.findById(id);
-        if (usuarioOptional.isEmpty())
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if (usuarioOptional.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         User usuario = usuarioOptional.get();
         this.binanceServico.setAPI_KEY(usuario.getBinanceApiKey());
         this.binanceServico.setSECRET_KEY(usuario.getBinanceSecretKey());
 
-        ObjectMapper mapeadorObjeto = new ObjectMapper();
-        mapeadorObjeto.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        try {
-            String resultado = this.binanceServico.createMarketOrder(pedido.getSimbolo(),
-                    pedido.getQuantidade(),
-                    pedido.getLado());
-            OrderResponse resposta = mapeadorObjeto.readValue(resultado, OrderResponse.class);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-            if ("BUY".equals(pedido.getLado())) {
+        try {
+            String resultado;
+
+            if (pedido.getPreco() > 0) {
+                resultado = this.binanceServico.createLimitOrder(pedido.getSimbolo(), pedido.getQuantidade(), pedido.getLado(), pedido.getPreco());
+            } else if (pedido.getStopPrice() != null && "SELL".equalsIgnoreCase(pedido.getLado())) {
+                resultado = this.binanceServico.createStopLossOrder(pedido.getSimbolo(), pedido.getQuantidade(), pedido.getLado(), pedido.getStopPrice());
+            } else if (pedido.getStopPrice() != null && "BUY".equalsIgnoreCase(pedido.getLado())) {
+                resultado = this.binanceServico.createTakeProfitOrder(pedido.getSimbolo(), pedido.getQuantidade(), pedido.getLado(), pedido.getStopPrice());
+            } else {
+                resultado = this.binanceServico.createMarketOrder(pedido.getSimbolo(), pedido.getQuantidade(), pedido.getLado());
+            }
+
+            OrderResponse resposta = mapper.readValue(resultado, OrderResponse.class);
+
+            // Lógica de salvar relatório continua igual...
+            if ("BUY".equalsIgnoreCase(pedido.getLado())) {
                 UserOrderReport relatorio = new UserOrderReport();
-                relatorio .setSimbolo(pedido.getSimbolo());
+                relatorio.setSimbolo(pedido.getSimbolo());
                 relatorio.setQuantidade(pedido.getQuantidade());
                 relatorio.setPrecoCompra(resposta.getPreenchimentos().get(0).getPreco());
                 relatorio.setDataOperacao(LocalDateTime.now());
 
                 this.relatorioOrdemRepositorio.save(relatorio);
-
                 usuario.getRelatoriosDeOrdens().add(relatorio);
                 this.usuarioRepositorio.save(usuario);
             }
 
-            if ("SELL".equals(pedido.getLado())) {
-                UserOrderReport ordem = null;
-                for (UserOrderReport item : usuario.getRelatoriosDeOrdens()) {
-                    if (item.getSimbolo().equals(pedido.getSimbolo()) && item.getPrecoVenda() == 0) {
-                        ordem = item;
-                        break;
-                    }
-                }
+            if ("SELL".equalsIgnoreCase(pedido.getLado())) {
+                UserOrderReport ordem = usuario.getRelatoriosDeOrdens().stream()
+                        .filter(item -> item.getSimbolo().equals(pedido.getSimbolo()) && item.getPrecoVenda() == 0)
+                        .findFirst().orElse(null);
 
                 if (ordem != null) {
                     ordem.setPrecoVenda(resposta.getPreenchimentos().get(0).getPreco());
@@ -77,6 +82,7 @@ public class OrderController {
             }
 
             return new ResponseEntity<>(resposta, HttpStatus.OK);
+
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

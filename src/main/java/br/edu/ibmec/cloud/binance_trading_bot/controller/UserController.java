@@ -47,17 +47,24 @@ public class UserController {
 
 
     @PostMapping("{id}/configuration")
-    public ResponseEntity<User> associarConfiguracao(@PathVariable("id") Integer id, @RequestBody UserConfiguration configuracao) {
-        Optional<User> usuarioOpcional = this.usuarioRepository.findById(id);
-        if (usuarioOpcional.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> associarConfiguracao(@PathVariable("id") Integer id, @RequestBody UserConfiguration configuracao) {
+        try {
+            Optional<User> usuarioOpcional = this.usuarioRepository.findById(id);
+            if (usuarioOpcional.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        this.configuracaoRepository.save(configuracao);
-        User usuario = usuarioOpcional.get();
-        usuario.getConfiguracoes().add(configuracao);
-        usuarioRepository.save(usuario);
+            this.configuracaoRepository.save(configuracao);
+            User usuario = usuarioOpcional.get();
+            usuario.getConfiguracoes().add(configuracao);
+            usuarioRepository.save(usuario);
 
-        return new ResponseEntity<>(usuario, HttpStatus.CREATED);
+            return new ResponseEntity<>(usuario, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
+
+
+
 
     @PostMapping("{id}/tracking-ticker")
     public ResponseEntity<User> associarTicker(@PathVariable("id") Integer id, @RequestBody UserTrackingTicker ticker) {
