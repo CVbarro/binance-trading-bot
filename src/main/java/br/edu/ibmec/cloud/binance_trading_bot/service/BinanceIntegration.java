@@ -131,10 +131,16 @@ public class BinanceIntegration {
         double currHigh = Double.parseDouble(curr.getString(2));
         double currLow = Double.parseDouble(curr.getString(3));
         double currClose = Double.parseDouble(curr.getString(4));
+        double prevOpen = Double.parseDouble(curr.getString(1));
+        double prevClose = Double.parseDouble(prev.getString(4));
+        double currOpen = Double.parseDouble(curr.getString(1));
 
         // Log visual
-        System.out.printf("🕯️ Candle Anterior → [High: %.2f | Low: %.2f]%n", prevHigh, prevLow);
-        System.out.printf("🕯️ Candle Atual    → [High: %.2f | Low: %.2f | Close: %.2f]%n", currHigh, currLow, currClose);
+        System.out.printf("🕯️ Candle Anterior → [Open: %.2f | High: %.2f | Low: %.2f | Close: %.2f]%n",
+                prevOpen, prevHigh, prevLow, prevClose);
+
+        System.out.printf("🕯️ Candle Atual    → [Open: %.2f | High: %.2f | Low: %.2f | Close: %.2f]%n",
+                currOpen, currHigh, currLow, currClose);
 
         boolean isInsideBar = (currHigh <= prevHigh) && (currLow >= prevLow);
 
