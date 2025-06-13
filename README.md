@@ -3,7 +3,8 @@
 ## 👨‍💻 Desenvolvedores
 - Vitor Farani  
 - João Pedro Bezamat  
-- César Viana  
+- César Viana
+- Rodrigo Souza
 
 ---
 
